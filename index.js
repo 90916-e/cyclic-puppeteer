@@ -1,41 +1,14 @@
-const path = require('path')
-const express = require('express')
-const app = express()
-const router = express.Router()
+const CharacterAI = require('node_characterai');
+const characterAI = new CharacterAI();
 
-const chromium = require('chrome-aws-lambda');
+(async() => {
+    await characterAI.authenticateAsGuest();
 
+    const characterId = "8_1NyR8w1dOXmI1uWaieQcd147hecbdIK7CeEAIrdJw" // Discord moderator
 
-app.use('/',router)
+    const chat = await characterAI.createOrContinueChat(characterId);
+    const response = await chat.sendAndAwaitResponse('Hello discord mod!', true)
 
-router.get('/', async (req, res)=>{
-    let result = null;
-    let browser = null;
-    console.log(await chromium.executablePath)
-
-    try {
-      browser = await chromium.puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath,
-        headless: chromium.headless,
-        ignoreHTTPSErrors: true,
-      });
-  
-      let page = await browser.newPage();
-  
-      await page.goto('https://cyclic.sh');
-  
-      result = await page.title();
-    } catch (error) {
-        throw error
-    } finally {
-      if (browser !== null) {
-        await browser.close();
-      }
-    }
-
-    return res.send(result)
-})
-
-app.listen(3000)
+    console.log(response);
+    // use response.text to use it in a string.
+})();
